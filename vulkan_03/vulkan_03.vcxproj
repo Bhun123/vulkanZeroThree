@@ -125,11 +125,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="camera.cpp" />
+    <ClCompile Include="engine.cpp" />
+    <ClCompile Include="ioHandler.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="renderer.cpp" />
     <ClCompile Include="rendererStructs.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="camera.h" />
+    <ClInclude Include="engine.h" />
+    <ClInclude Include="ioHandler.h" />
     <ClInclude Include="renderer.h" />
     <ClInclude Include="rendererStructs.h" />
   </ItemGroup>

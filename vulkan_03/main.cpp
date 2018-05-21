@@ -1,4 +1,5 @@
 #include "renderer.h"
+#include "engine.h"
 
 #include <exception>
 #include <iostream>
@@ -7,7 +8,8 @@ int main()
 {
 	try
 	{
-		renderer rendererObject;
+		//renderer rendererObject;
+		engine en;
 	}
 	catch(std::exception& e)
 	{

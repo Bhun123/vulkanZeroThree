@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="engine">
+      <UniqueIdentifier>{7164be59-0233-44eb-a8b7-09d7cd248ebd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -24,6 +27,15 @@
     <ClCompile Include="rendererStructs.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="engine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="camera.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="ioHandler.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="renderer.h">
@@ -31,6 +43,15 @@
     </ClInclude>
     <ClInclude Include="rendererStructs.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="engine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="camera.h">
+      <Filter>engine</Filter>
+    </ClInclude>
+    <ClInclude Include="ioHandler.h">
+      <Filter>engine</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

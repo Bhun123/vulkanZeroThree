@@ -4,11 +4,7 @@
 
 renderer::renderer() : buffers(*this)
 {
-	initializeVulkan();
-
-	random();
-
-	mainLoop();
+	
 }
 
 renderer::~renderer()
@@ -16,11 +12,11 @@ renderer::~renderer()
 	glfwDestroyWindow(mWindow);
 }
 
-void renderer::initializeVulkan()
+void renderer::initialize()
 {
 	try
 	{
-		createWindow();
+		//createWindow();
 		createInstance();
 		createDebug();
 		createDevice();
@@ -49,9 +45,9 @@ void renderer::initializeVulkan()
 	}
 }
 
-void renderer::mainLoop()
+void renderer::frame()
 {
-	while (!glfwWindowShouldClose(mWindow))
+	/*while (!glfwWindowShouldClose(mWindow))
 	{
 		glfwPollEvents();
 
@@ -60,7 +56,10 @@ void renderer::mainLoop()
 		updateMatrix();
 
 		vkDeviceWaitIdle(mDevice.get());
-	}
+	}*/
+	drawFrame();
+
+	vkDeviceWaitIdle(mDevice.get());
 }
 
 void renderer::createWindow()
@@ -143,11 +142,15 @@ void renderer::createDevice()
 	// we need extensions for swap chain enabled
 	const std::vector<const char *> deviceExtensions{ VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
+	auto features = vk::PhysicalDeviceFeatures()
+		.setFillModeNonSolid(true);
+
 	auto deviceInfo = vk::DeviceCreateInfo()
 		.setQueueCreateInfoCount(1)
 		.setPQueueCreateInfos(&deviceQueueInfo)
 		.setEnabledExtensionCount(static_cast<uint32_t>(deviceExtensions.size()))
-		.setPpEnabledExtensionNames(deviceExtensions.data());
+		.setPpEnabledExtensionNames(deviceExtensions.data())
+		.setPEnabledFeatures(&features);
 
 	mDevice = mPhysicalDevice.createDeviceUnique(deviceInfo);
 
@@ -635,19 +638,21 @@ void renderer::drawFrame()
 	//vkQueueWaitIdle(mQueue);
 }
 
-void renderer::updateMatrix()
+void renderer::updateMatrix(glm::mat4 view)
 {
 	static auto startTime = std::chrono::high_resolution_clock::now();
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	float time = std::chrono::duration<float>(currentTime - startTime).count();
 
-	glm::mat4 model, view, projection;
+	glm::mat4 model, projection;
 	
+	model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
 	model = glm::rotate(model, 0.8f * time, glm::vec3(0.0f, 0.0f, 1.0f));
 	model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
 	model = glm::rotate(model, 3.0f * time, glm::vec3(0.0f, 0.0f, 1.0f));
 
-	view = glm::lookAt(glm::vec3(0.0f, -3.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	//view = glm::lookAt(glm::vec3(0.0f, -3.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	projection = glm::perspective(glm::radians(45.0f), WIN_WIDTH / (float)WIN_HEIGHT, 0.1f, 500.0f);
 	projection[1][1] *= -1;
 

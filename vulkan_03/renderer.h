@@ -47,9 +47,9 @@ public:
 	virtual ~renderer();
 
 	
-private:
-	void initializeVulkan();
-	void mainLoop();
+//private:
+	void initialize();
+	void frame();
 
 	// vulkan objects setup
 	void createWindow();
@@ -75,7 +75,7 @@ private:
 
 	// vulkan draw frame
 	void drawFrame();
-	void updateMatrix();
+	void updateMatrix(glm::mat4 view);
 
 	// setup helper functions
 	std::vector<const char *> getInstanceExtensions();
