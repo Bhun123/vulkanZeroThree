@@ -349,10 +349,14 @@ void renderer::createDescriptors()
 	mDescriptorPool = mDevice.get().createDescriptorPoolUnique(poolCreateInfo);
 
 	// descriptor set
+
+	// pri Release to nefunguje normalne
+	vk::DescriptorSetLayout optimizationVariable00 = mDescriptorSetLayout.get();
+
 	auto descriptorSetAllocInfo = vk::DescriptorSetAllocateInfo()
 		.setDescriptorPool(mDescriptorPool.get())
 		.setDescriptorSetCount(1)
-		.setPSetLayouts(&mDescriptorSetLayout.get());
+		.setPSetLayouts(&optimizationVariable00);
 
 	mDescriptorSets = mDevice.get().allocateDescriptorSets(descriptorSetAllocInfo);
 
@@ -465,9 +469,11 @@ void renderer::createGraphicsPipeline()
 		.setDepthBoundsTestEnable(VK_FALSE)
 		.setStencilTestEnable(VK_FALSE);
 
+	// pri Release to nefunguje normalne
+	vk::DescriptorSetLayout optimizationVariable00 = mDescriptorSetLayout.get();
 	auto pipelineLayoutInfo = vk::PipelineLayoutCreateInfo()
 		.setSetLayoutCount(1)
-		.setPSetLayouts(&mDescriptorSetLayout.get());
+		.setPSetLayouts(&optimizationVariable00);
 
 	mPipelineLayout = mDevice.get().createPipelineLayoutUnique(pipelineLayoutInfo);
 
@@ -535,11 +541,13 @@ void renderer::createCommandBuffers()
 		mCommandBuffers[i].get().beginRenderPass(renderPassBeginInfo, vk::SubpassContents::eInline);
 		mCommandBuffers[i].get().bindPipeline(vk::PipelineBindPoint::eGraphics, mPipeline.get());
 		std::array<vk::Buffer, 1>vBuffers = { buffers.getBuffer("vertexBuffer") }; std::array<vk::DeviceSize, 1> offsets = { 0 };
+
 		mCommandBuffers[i].get().bindVertexBuffers(0, vBuffers, offsets);
 		mCommandBuffers[i].get().bindIndexBuffer(buffers.getBuffer("indexBuffer"), 0, vk::IndexType::eUint16);
 		std::vector<uint32_t> arr;
 		mCommandBuffers[i].get().bindDescriptorSets(vk::PipelineBindPoint::eGraphics, mPipelineLayout.get(), 0, mDescriptorSets, arr);
 		mCommandBuffers[i].get().drawIndexed(indices.size(), 1, 0, 0, 0);
+
 		mCommandBuffers[i].get().endRenderPass();
 
 		mCommandBuffers[i].get().end();
@@ -613,24 +621,33 @@ void renderer::drawFrame()
 	uint32_t imageIndex;
 	mDevice.get().acquireNextImageKHR(mSwapchain.get(), std::numeric_limits<uint64_t>::max(), mSemaphore_NextImageAvailable.get(), vk::Fence(), &imageIndex);
 
+
+
+	// pri Release to nefunguje normalne (nejaka blbost lol)
+	auto optimizationVariable00 = mSemaphore_NextImageAvailable.get();
+	auto optimizationVariable01 = mSemaphore_RenderFinished.get();
+	auto optimizationVariable02 = mCommandBuffers[imageIndex].get();
+	auto optimizationVariable03 = mSwapchain.get();
+
 	vk::PipelineStageFlags PSflags = vk::PipelineStageFlagBits::eColorAttachmentOutput;
 
+	
 	auto submitInfo = vk::SubmitInfo()
 		.setWaitSemaphoreCount(1)
-		.setPWaitSemaphores(&mSemaphore_NextImageAvailable.get())
+		.setPWaitSemaphores(&optimizationVariable00)
 		.setPWaitDstStageMask(&PSflags)
 		.setCommandBufferCount(1)
-		.setPCommandBuffers(&mCommandBuffers[imageIndex].get())
+		.setPCommandBuffers(&optimizationVariable02)
 		.setSignalSemaphoreCount(1)
-		.setPSignalSemaphores(&mSemaphore_RenderFinished.get());
+		.setPSignalSemaphores(&optimizationVariable01);
 
 	mQueue.submit(submitInfo, vk::Fence());
 
 	auto presentInfo = vk::PresentInfoKHR()
 		.setWaitSemaphoreCount(1)
-		.setPWaitSemaphores(&mSemaphore_RenderFinished.get())
+		.setPWaitSemaphores(&optimizationVariable01)
 		.setSwapchainCount(1)
-		.setPSwapchains(&mSwapchain.get())
+		.setPSwapchains(&optimizationVariable03)
 		.setPImageIndices(&imageIndex);
 	
 	mQueue.presentKHR(presentInfo);
@@ -841,6 +858,55 @@ void renderer::random()
 
 	VmaStats stats;
 	vmaCalculateStats(buffers.allocator, &stats);
+}
+
+void renderer::commandBuffersCreator()
+{
+	// command buffers for each framebuffer
+	mCommandBuffers.resize(mSwapchainFramebuffers.size());
+	auto commandBuffersInfo = vk::CommandBufferAllocateInfo()
+		.setCommandPool(mCommandPool.get())
+		.setLevel(vk::CommandBufferLevel::ePrimary)
+		.setCommandBufferCount(static_cast<uint32_t>(mCommandBuffers.size()));
+	mCommandBuffers = mDevice.get().allocateCommandBuffersUnique(commandBuffersInfo);
+
+	for (size_t i = 0; i < mCommandBuffers.size(); ++i)
+	{
+		auto beginInfo = vk::CommandBufferBeginInfo();
+		mCommandBuffers[i].get().begin(beginInfo);
+
+		std::array<vk::ClearValue, 2> clearValues;
+		clearValues[0] = vk::ClearValue()
+			.setColor(vk::ClearColorValue(std::array<float, 4>({ 0.0f, 0.0f, 0.0f, 1.0f })));
+		clearValues[1] = vk::ClearValue()
+			.setDepthStencil(vk::ClearDepthStencilValue(1.0f));
+
+		auto renderPassBeginInfo = vk::RenderPassBeginInfo()
+			.setRenderPass(mRenderPass.get())
+			.setFramebuffer(mSwapchainFramebuffers[i].get())
+			.setRenderArea(
+				vk::Rect2D()
+				.setExtent(mSwapchainExtent)
+				.setOffset({ 0,0 })
+			)
+			.setClearValueCount(static_cast<uint32_t>(clearValues.size()))
+			.setPClearValues(clearValues.data());
+
+		mCommandBuffers[i].get().beginRenderPass(renderPassBeginInfo, vk::SubpassContents::eInline);
+
+		mCommandBuffers[i].get().bindPipeline(vk::PipelineBindPoint::eGraphics, mPipeline.get());
+
+		std::array<vk::Buffer, 1>vBuffers = { buffers.getBuffer("vertexBuffer") }; std::array<vk::DeviceSize, 1> offsets = { 0 };
+		mCommandBuffers[i].get().bindVertexBuffers(0, vBuffers, offsets);
+		mCommandBuffers[i].get().bindIndexBuffer(buffers.getBuffer("indexBuffer"), 0, vk::IndexType::eUint16);
+		std::vector<uint32_t> arr;
+		mCommandBuffers[i].get().bindDescriptorSets(vk::PipelineBindPoint::eGraphics, mPipelineLayout.get(), 0, mDescriptorSets, std::vector<uint32_t>());
+		mCommandBuffers[i].get().drawIndexed(indices.size(), 1, 0, 0, 0);
+
+		mCommandBuffers[i].get().endRenderPass();
+
+		mCommandBuffers[i].get().end();
+	}
 }
 
 VkResult renderer::CDdebugReportCallback::pfn_vkCreateDebugReportCallbackEXT(VkInstance instance, const VkDebugReportCallbackCreateInfoEXT * pCreateInfo, const VkAllocationCallbacks * pAllocator, VkDebugReportCallbackEXT * pCallback)

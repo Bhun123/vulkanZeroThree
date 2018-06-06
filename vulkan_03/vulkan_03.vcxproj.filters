@@ -36,6 +36,9 @@
     <ClCompile Include="ioHandler.cpp">
       <Filter>engine</Filter>
     </ClCompile>
+    <ClCompile Include="model.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="renderer.h">
@@ -51,6 +54,9 @@
       <Filter>engine</Filter>
     </ClInclude>
     <ClInclude Include="ioHandler.h">
+      <Filter>engine</Filter>
+    </ClInclude>
+    <ClInclude Include="model.h">
       <Filter>engine</Filter>
     </ClInclude>
   </ItemGroup>

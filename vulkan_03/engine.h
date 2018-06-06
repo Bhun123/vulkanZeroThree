@@ -4,7 +4,10 @@
 #include "camera.h"
 #include "ioHandler.h"
 
+#include "model.h"
+
 #include <iostream>
+#include <vector>
 
 class engine
 {
@@ -22,6 +25,8 @@ public:
 	ioHandler mIoHandler;
 
 	double_t lastT = 0, avg = 0; uint32_t cnt = 0;
+
+	std::vector<model> models;
 };
 
 

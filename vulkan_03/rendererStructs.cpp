@@ -1,3 +1,4 @@
+#define GLM_ENABLE_EXPERIMENTAL
 #include "rendererStructs.h"
 
 vk::VertexInputBindingDescription Vertex::getBindingDescription()
@@ -27,4 +28,9 @@ std::array<vk::VertexInputAttributeDescription, 3> Vertex::getAttributeDescripti
 	attributeDescriptions[2].setOffset(offsetof(Vertex, texCoord));
 
 	return attributeDescriptions;
+}
+
+bool Vertex::operator==(Vertex vert) const
+{
+	return vert.pos == this->color && vert.color == this->color && vert.texCoord == this->texCoord;
 }

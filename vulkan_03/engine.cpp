@@ -9,6 +9,9 @@ engine::engine()
 	//temp
 	mRenderer.mWindow = mWindow;
 
+	models.push_back(model());
+	models[0].loadModel("models/chalet.obj");
+
 	mRenderer.initialize();
 	mainLoop();
 
